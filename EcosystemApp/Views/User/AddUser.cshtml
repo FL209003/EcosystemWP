@@ -1,0 +1,50 @@
+﻿@model EcosystemApp.Models.VMUser;
+
+@{
+    ViewData["Title"] = "AddUser";
+}
+
+<h1>Registro de usuario</h1>
+
+<h3>@ViewBag.Error</h3>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddUser">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="User.Username" class="control-label"></label>
+                <input asp-for="User.Username" class="form-control" />
+                <span asp-validation-for="User.Username" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="User.Password" class="control-label"></label>
+                <input type="password" asp-for="User.Password" class="form-control" />
+                <span asp-validation-for="User.Password" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="VerificationPass" class="control-label"></label>
+                <input type="password" asp-for="VerificationPass" class="form-control" />
+                <span asp-validation-for="VerificationPass" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Rol</label>
+                <select name="User.Role">
+                    <option selected value="">Seleccione Rol</option>
+                    <option value="Admin">Admin</option>
+                    <option value="User">User</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

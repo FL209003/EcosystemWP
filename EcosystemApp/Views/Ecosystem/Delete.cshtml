@@ -1,0 +1,17 @@
+﻿@model Domain.Entities.Ecosystem
+@{
+    ViewData["Title"] = "Delete";
+}
+
+<h3 class="text-dark"><i><b>Confirmar eliminación</b></i></h3>
+<h4>@ViewBag.Error</h4>
+<br />
+<h4 class="text-dark"><i><b>Esta seguro/a de querer eliminar el ecosistema?</b></i></h4>
+<hr />
+
+<div>
+    <form asp-action="Delete">
+        <input type="submit" value="Eliminar" class="btn btn-danger" />
+        <a asp-action="Index">Cancelar</a>
+    </form>
+</div>

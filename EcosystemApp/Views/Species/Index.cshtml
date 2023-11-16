@@ -1,0 +1,134 @@
+﻿@model IEnumerable<Domain.Entities.Species>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h3 class="text-dark"><i><b>Especies</b></i></h3>
+<br />
+<hr />
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div style="display: flex">
+    <form asp-action="Index">
+        <input type="hidden" name="option" value="Cientific">
+        <input type="submit" value="Nombre Científico" class="btn btn-success" />
+    </form>
+    <form asp-action="Index">
+        <input type="hidden" name="option" value="Extintion">
+        <input type="submit" value="Peligro de Extinción" class="btn btn-success" />
+    </form>     
+    <form asp-action="Index">
+    <div style="display: flex; flex-direction:column">
+        <input type="submit" value="Por peso" class="btn btn-success" />
+        <div>
+            Peso Minimo:
+            <input type="number" name="optionParam1" />
+        </div>
+        <div>
+            Peso Maximo:
+            <input type="number" name="optionParam2" />
+        </div>
+            
+        <input type="hidden" name="option" value="Weight">
+    </div>
+    </form>
+    <form asp-action="Index">
+        <div style="display: flex; flex-direction:column">
+            <input type="submit" value="Mostrar por Ecosistema" class="btn btn-success" />
+            <div>
+                Id Ecosistema:
+                <input type="number" name="optionParam1" />
+            </div>
+            <input type="hidden" name="option" value="eco">
+        </div>
+    </form>
+</div>
+
+<h4>@ViewBag.Error</h4>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
+                Nombre cientifico
+            </th>
+            <th>
+                Peso minimo
+            </th>
+            <th>
+                Peso Maximo
+            </th>
+            <th>
+                Tama;o maximo
+            </th>
+            <th>
+                Tama;o minimo
+            </th>
+            <th>
+                Estado de conservacion
+            </th>
+            <th>
+                Seguridad
+            </th>
+            <th>
+                Ecosystemas
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.ImgRoute)
+            </th>            
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.CientificName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.WeightRangeMin)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.WeightRangeMax)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LongRangeAdultMin)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.LongRangeAdultMax)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.SpeciesConservation.ConservationName.Value)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Security)
+                </td>
+                <td>
+                    @if (item.Ecosystems == null || item.Ecosystems.Count() == 0){ <p>Esta especie no tiene un ecosistema asociado</p>
+                    }
+                    else
+                    {
+                        @foreach (Domain.Entities.Ecosystem eco in item.Ecosystems)
+                        {
+                            <label>Nombre: @eco.EcosystemName.Value <span style="color: blue">Id: @eco.Id</span></label>
+                        }
+                    }
+                </td>
+                <td>
+                    <img src="/img/Species/@item.ImgRoute" height="60" />
+                </td>
+                <td>
+                    @Html.ActionLink("Eliminar", "Delete", new { id=item.Id }) | 
+                    @Html.ActionLink("Asignar ecosistema", "AssignEcosystem", new {id = item.Id}) |
+                    @Html.ActionLink("Ecosistemas donde no habita", "ListUninhabitableEcos", new {id = item.Id})
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<h4 class="text-dark"><b><a class="btn btn-primary" asp-action="AddSpecies">Nueva especie</a></b></h4>

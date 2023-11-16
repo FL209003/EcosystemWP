@@ -1,0 +1,104 @@
+﻿@model EcosystemApp.Models.VMSpecies;
+
+@{
+    ViewData["Title"] = "AddSpecies";
+}
+
+<h3 class="text-dark"><i><b>Nueva Especie</b></i></h3>
+<br />
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="AddSpecies" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Species.CientificName" class="control-label">Nombre científico</label>
+                <input asp-for="Species.CientificName" class="form-control" />
+                <span asp-validation-for="Species.CientificName" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SpeciesNameVal" class="control-label">Nombre de la especie</label>
+                <input asp-for="SpeciesNameVal" class="form-control" />
+                <span asp-validation-for="SpeciesNameVal" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SpeciesDescriptionVal" class="control-label">Descripción</label>
+                <textarea asp-for="SpeciesDescriptionVal" class="form-control"></textarea>
+                <span asp-validation-for="SpeciesDescriptionVal" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Species.WeightRangeMin" class="control-label">Peso mínimo(kg)</label>
+                <input type="number" asp-for="Species.WeightRangeMin" class="form-control" />
+                <span asp-validation-for="Species.WeightRangeMin" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Species.WeightRangeMax" class="control-label">Peso máximo(kg)</label>
+                <input type="number" asp-for="Species.WeightRangeMax" class="form-control" />
+                <span asp-validation-for="Species.WeightRangeMax" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Species.LongRangeAdultMin" class="control-label">Longitud mínima(mts) de specimen adulto</label>
+                <input type="number" asp-for="Species.LongRangeAdultMin" class="form-control" />
+                <span asp-validation-for="Species.LongRangeAdultMin" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Species.LongRangeAdultMax" class="control-label">Longitud máxima(mts) de specimen adulto</label>
+                <input type="number" asp-for="Species.LongRangeAdultMax" class="form-control" />
+                <span asp-validation-for="Species.LongRangeAdultMax" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Species.Security" class="control-label">Nivel de seguridad (0-100)</label>
+                <input type="number" asp-for="Species.Security" class="form-control" />
+                <span asp-validation-for="Species.Security" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ImgSpecies" class="control-label">Imagen de la especie</label>
+                <input asp-for="ImgSpecies" class="form-control" />
+                <span asp-validation-for="ImgSpecies" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Amenazas</label>
+                <select name="IdSelectedThreats" multiple>
+                    @foreach (Domain.Entities.Threat threat in Model.Threats)
+                    {
+                        if (Model.IdSelectedThreats.Contains(threat.Id))
+                        {
+                            <option selected value="@threat.Id">@threat.ThreatName.Value</option>
+                        }
+                        else
+                        {
+                            <option value="@threat.Id">@threat.ThreatName.Value</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Ecosistemas</label>
+                <select name="IdSelectedEcos" multiple>
+                    @foreach (Domain.Entities.Ecosystem eco in Model.Ecosystems)
+                    {
+                        if (Model.IdSelectedThreats.Contains(eco.Id))
+                        {
+                            <option selected value="@eco.Id">@eco.EcosystemName.Value</option>
+                        }
+                        else
+                        {
+                            <option value="@eco.Id">@eco.EcosystemName.Value</option>
+                        }
+                    }
+                </select>
+            </div>
+            <br />
+            <div class="form-group">
+                <input type="submit" value="Crear" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+<br />
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,92 @@
+﻿@using Domain.Entities;
+@model EcosystemApp.Models.VMSpecies;
+
+@{
+    ViewData["Title"] = "AssignEcosystem";
+}
+
+<h1>Asignar un ecosistema a la especie</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+
+        <h5>Nombre de la especie</h5>
+        @Html.DisplayFor(model => model.Species.SpeciesName.Value)
+        <h5>Amenazas que sufre la especie</h5>
+        @if (Model.Species.Threats == null || Model.Species.Threats.Count == 0)
+        {
+            <p>Esta especie no tiene amenazas</p>
+        }
+        else
+        {
+            @foreach (Threat threat in Model.Species.Threats)
+            {
+                <p>
+                    @threat.ThreatName.Value
+                </p>
+            }
+        }
+        <h5>Nivel de seguridad de la especie</h5>
+        @Html.DisplayFor(model => model.Species.Security)
+        <h5>Ecosistemas Habitados ya por la especie</h5>
+        @if (Model.Species.Ecosystems == null || Model.Species.Ecosystems.Count == 0)
+        {
+            <p>No hay ecosistemas asociados para esta especie</p>
+        }
+        else
+        {
+            @foreach (Ecosystem eco in Model.Species.Ecosystems)
+            {
+                <p>
+                    Nombre: @eco.EcosystemName.Value <br />
+                    Nivel de seguridad: @eco.Security <br />
+                    Amenazas:
+                    @foreach (Threat threat in eco.Threats)
+                    {
+                        @threat.ThreatName.Value
+                    }
+                </p>
+            }
+        }
+        <h5>Ecosistemas para asociar</h5>
+        @if (Model.Ecosystems == null || Model.Ecosystems.Count() == 0)
+        {
+            <p>No hay ecosistemas validos para asignar</p>
+        }
+        else
+        {
+            <h6>(Solo se mostraran los Ecosistemas que esta especie pueda habitar)</h6>
+            <form asp-action="AssignEcosystem" enctype="multipart/form-data">
+                <div class="form-group">
+                    <select name="IdSelectedEcos" multiple>
+                        @foreach (Domain.Entities.Ecosystem eco in Model.Ecosystems)
+                        {
+                            if (Model.IdSelectedThreats.Contains(eco.Id))
+                            {
+                                <option selected value="@eco.Id">@eco.EcosystemName.Value</option>
+                            }
+                            else
+                            {
+                                <option value="@eco.Id">
+                                    @eco.EcosystemName.Value, Nivel de Seguridad: @eco.Security
+                                </option>
+                            }
+                        }
+                    </select>
+                    <input name="speciesId" type="hidden" value="@Model.Species.Id" />
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Asignar" class="btn btn-primary" />
+                </div>
+            </form>
+        }
+    </div>
+</div>
+<div><a asp-action="Index">Volver a Especies</a></div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

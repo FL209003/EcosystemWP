@@ -1,0 +1,50 @@
+﻿@model IEnumerable<Domain.Entities.Ecosystem>
+
+@{
+    ViewData["Title"] = "ListUninhabitableEcos";
+}
+
+<h3>Ecosistemas inahabitables para la especie</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Coordenadas</th>
+            <th>Área</th>
+            <th>Descripción</th>
+            <th>Nivel de Seguridad</th>
+            <th>Estado de conservación</th>
+            <th>Imagen</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EcosystemName.Value)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.GeoDetails)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Area)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EcoDescription.Value)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Security)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.EcoConservation.ConservationName.Value)
+                </td>
+                <td>
+                    <img src="/img/Ecosystems/@item.ImgRoute" height="60" />
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<div><a asp-action="Index">Volver a Especies</a></div>

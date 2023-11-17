@@ -1,8 +1,3 @@
-using AccessLogic.Repositories;
-using AppLogic.UCInterfaces;
-using AppLogic.UseCases;
-using Domain.RepositoryInterfaces;
-using Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

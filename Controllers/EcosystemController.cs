@@ -1,64 +1,62 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using EcosystemApp.Filters;
 using EcosystemApp.Models;
+using DTOs;
+using Newtonsoft.Json;
+using EcosystemApp.Globals;
+using System.Security.Policy;
+using System;
 
 namespace EcosystemApp.Controllers
 {
     public class EcosystemController : Controller
     {
-        //public IAddEcosystem AddUC { get; set; }
-        //public IRemoveEcosystem RemoveUC { get; set; }
-        //public IListEcosystem ListUC { get; set; }
-        //public IFindEcosystem FindUC { get; set; }
-        //public IWebHostEnvironment WHE { get; set; }
-        //public IListCountries ListCountriesUC { get; set; }
-        //public IFindCountry FindCountryUC { get; set; }
-        //public IFindConservation FindConservationUC { get; set; }
-        //public IListThreats ListThreatsUC { get; set; }
-        //public IFindThreat FindThreatUC { get; set; }
+        public IWebHostEnvironment WHE { get; set; }
+        public string ApiURL { get; set; }
 
-        //public EcosystemController(IAddEcosystem addUC, IRemoveEcosystem removeUC, IListEcosystem listUC,
-        //    IFindEcosystem findUC, IWebHostEnvironment whe, IListCountries listCountries, IFindCountry findCountryUC, IFindConservation findConservationUC, IListThreats listThreatsUC, IFindThreat findThreatUC)
-        //{
-        //    AddUC = addUC;
-        //    RemoveUC = removeUC;
-        //    ListUC = listUC;
-        //    FindUC = findUC;
-        //    WHE = whe;
-        //    ListCountriesUC = listCountries;
-        //    FindCountryUC = findCountryUC;
-        //    FindConservationUC = findConservationUC;
-        //    ListThreatsUC = listThreatsUC;
-        //    FindThreatUC = findThreatUC;
-        //}
+        public EcosystemController(IWebHostEnvironment whe, IConfiguration conf)
+        {
+            WHE = whe;
+            ApiURL = conf.GetValue<string>("ApiURL");
+        }
 
         public ActionResult Index()
         {
-            //IEnumerable<Ecosystem> ecos = ListUC.List();
-            //if (ecos != null && ecos.Count() > 0)
-            //{
+            IEnumerable<EcosystemDTO> ecos = null;
 
-            //    return View(ecos);
-            //}
-            //else
-            //{
-            //    ViewBag.Error = "No se encontraron ecosistemas.";
-            //    return View(ecos);
-            //}
-            return View();
+            string url = $"{ApiURL}/api/Countries/";
+
+            string body = Global.GetContent(Global.GetResponse(url));
+
+            if (Global.GetResponse(url).IsSuccessStatusCode)
+            {
+                ecos = JsonConvert.DeserializeObject<List<EcosystemDTO>>(body);
+                return View(ecos);
+            }
+            else
+            {
+                ViewBag.Error = body;
+                return View(new List<EcosystemDTO>());
+            }
         }
 
         // public IActionResult Details() { return View(); }
 
-        //[Private]
-        //public ActionResult AddEcosystem()
-        //{
-        //    IEnumerable<Country> countries = ListCountriesUC.List();
-        //    IEnumerable<Threat> threats = ListThreatsUC.List();
-        //    VMEcosystem vmEcosystem = new VMEcosystem() { Countries = countries, IdSelectedCountry = new List<int>(), Threats = threats, IdSelectedThreats = new List<int>() };
-        //    return View(vmEcosystem);
-        //}
+        [Private]
+        public ActionResult AddEcosystem()
+        {
+            string urlCountries = $"{ApiURL}/api/Countries/";
+            string urlThreats = $"{ApiURL}/api/Threats/";
+
+            string bodyCountries = Global.GetContent(Global.GetResponse(urlCountries));
+            string bodyThreats = Global.GetContent(Global.GetResponse(urlThreats));
+
+            IEnumerable<CountryDTO> countries = JsonConvert.DeserializeObject<List<CountryDTO>>(bodyCountries);
+            IEnumerable<ThreatDTO> threats = JsonConvert.DeserializeObject<List<ThreatDTO>>(bodyThreats);
+
+            VMEcosystem vmEcosystem = new VMEcosystem() { Countries = countries, IdSelectedCountry = new List<int>(), Threats = threats, IdSelectedThreats = new List<int>() };
+            return View(vmEcosystem);
+        }
 
         // POST: EcosystemController/Create
         [Private]
@@ -101,13 +99,13 @@ namespace EcosystemApp.Controllers
                 //    {
                 //        model.ImgEco.CopyTo(fs);
                 //    }
-                    return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index));
                 //}
                 //else
                 //{
                 //    ViewBag.Error = "El tipo de imagen debe ser png, jpg o jpeg.";
                 //    ModelState.AddModelError(string.Empty, ViewBag.Error);
-                   return View(model);
+                return View(model);
                 // }
             }
             //catch (EcosystemException ex)

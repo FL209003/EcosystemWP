@@ -1,4 +1,4 @@
-﻿using EcosystemApp.DTOs;
+﻿using DTOs;
 using System.ComponentModel.DataAnnotations;
 
 namespace EcosystemApp.Models

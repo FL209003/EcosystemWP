@@ -1,4 +1,4 @@
-﻿@using Domain.Entities;
+﻿@using DTOs;
 @model EcosystemApp.Models.VMSpecies;
 
 @{
@@ -12,7 +12,7 @@
     <div class="col-md-4">
 
         <h5>Nombre de la especie</h5>
-        @Html.DisplayFor(model => model.Species.SpeciesName.Value)
+        @Html.DisplayFor(model => model.Species.Name)
         <h5>Amenazas que sufre la especie</h5>
         @if (Model.Species.Threats == null || Model.Species.Threats.Count == 0)
         {
@@ -20,11 +20,9 @@
         }
         else
         {
-            @foreach (Threat threat in Model.Species.Threats)
+            @foreach (ThreatDTO threat in Model.Species.Threats)
             {
-                <p>
-                    @threat.ThreatName.Value
-                </p>
+                <p>@threat.Name</p>
             }
         }
         <h5>Nivel de seguridad de la especie</h5>
@@ -36,15 +34,15 @@
         }
         else
         {
-            @foreach (Ecosystem eco in Model.Species.Ecosystems)
+            @foreach (EcosystemDTO eco in Model.Species.Ecosystems)
             {
                 <p>
-                    Nombre: @eco.EcosystemName.Value <br />
+                    Nombre: @eco.Name <br />
                     Nivel de seguridad: @eco.Security <br />
                     Amenazas:
-                    @foreach (Threat threat in eco.Threats)
+                    @foreach (ThreatDTO threat in eco.Threats)
                     {
-                        @threat.ThreatName.Value
+                        @threat.Name
                     }
                 </p>
             }
@@ -60,16 +58,16 @@
             <form asp-action="AssignEcosystem" enctype="multipart/form-data">
                 <div class="form-group">
                     <select name="IdSelectedEcos" multiple>
-                        @foreach (Domain.Entities.Ecosystem eco in Model.Ecosystems)
+                        @foreach (EcosystemDTO eco in Model.Ecosystems)
                         {
                             if (Model.IdSelectedThreats.Contains(eco.Id))
                             {
-                                <option selected value="@eco.Id">@eco.EcosystemName.Value</option>
+                                <option selected value="@eco.Id">@eco.Name</option>
                             }
                             else
                             {
                                 <option value="@eco.Id">
-                                    @eco.EcosystemName.Value, Nivel de Seguridad: @eco.Security
+                                    @eco.Name, Nivel de Seguridad: @eco.Security
                                 </option>
                             }
                         }

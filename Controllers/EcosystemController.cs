@@ -12,7 +12,7 @@ namespace EcosystemApp.Controllers
     public class EcosystemController : Controller
     {
         public IWebHostEnvironment WHE { get; set; }
-        public string ApiURL { get; set; }
+        public string? ApiURL { get; set; }
 
         public EcosystemController(IWebHostEnvironment whe, IConfiguration conf)
         {

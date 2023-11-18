@@ -1,3 +1,6 @@
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
+
 namespace DTOs
 {
     public class ThreatDTO

@@ -11,54 +11,14 @@ namespace EcosystemApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        //public IFindUser FindUserUC { get; set; }
+        private readonly ILogger<HomeController> _logger;        
 
-        //public HomeController(ILogger<HomeController> logger, IFindUser findUser)
-        //{
-        //    _logger = logger;
-        //    FindUserUC = findUser;
-        //}
-
-        public IActionResult Index() { return View(); }
-
-        public IActionResult Login() { return View(); }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public IActionResult Login(LoginViewModel model)
+        public HomeController(ILogger<HomeController> logger)
         {
-            //if (ModelState.IsValid)
-            //{
-            //    try
-            //    {
-            //        User u = FindUserUC.Find(model.Username);
-            //        if (u != null && Hash.ValidateHash(model.Password, u.HashPassword))
-            //        {
-            //            HttpContext.Session.SetString("username", u.Username);
-            //            HttpContext.Session.SetString("rol", u.Role);
-            //            return RedirectToAction("Index", "Home");
-            //        }
-            //        else throw new InvalidOperationException("Nombre de usuario y/o contraseña incorrectos.");
-            //    }
-            //    catch (InvalidOperationException ex)
-            //    {
-            //        ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
-            //        return View(model);
-            //    }
-            //    catch (Exception ex)
-            //    {
-            //        ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
-            //        return View(model);
-            //    }
-            //}
-            return View(model);
+            _logger = logger;            
         }
-        public IActionResult Logout()
-        {
-            HttpContext.Session.Clear();
-            return RedirectToAction("Login");
-        }
+
+        public IActionResult Index() { return View(); }        
 
         public IActionResult Privacy()
         {

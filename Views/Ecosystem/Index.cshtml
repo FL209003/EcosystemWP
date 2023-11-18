@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Domain.Entities.Ecosystem>
+﻿@model IEnumerable<DTOs.EcosystemDTO>
 
 @{
     ViewData["Title"] = "Index";
@@ -30,7 +30,7 @@
                     @Html.DisplayFor(modelItem => item.Id)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.EcosystemName.Value)
+                    @Html.DisplayFor(modelItem => item.Name)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.GeoDetails)
@@ -39,13 +39,13 @@
                     @Html.DisplayFor(modelItem => item.Area)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.EcoDescription.Value)
+                    @Html.DisplayFor(modelItem => item.Description)
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Security)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.EcoConservation.ConservationName.Value)
+                    @Html.DisplayFor(modelItem => item.Conservation.Name)
                 </td>
                 <td>
                     <img src="/img/Ecosystems/@item.ImgRoute" height="60" />

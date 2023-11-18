@@ -64,68 +64,85 @@ namespace EcosystemApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddEcosystem(VMEcosystem model)
         {
-            try
+            if (HttpContext.Session.GetString("rol") != null)
             {
-                //model.Countries = ListCountriesUC.List();
-                //if (model.Ecosystem.Countries == null) { model.Ecosystem.Countries = new List<Country>(); };
-                //if (model.IdSelectedCountry == null) { model.IdSelectedCountry = new List<int>(); };                
-                //foreach (int country in model.IdSelectedCountry) { model.Ecosystem.Countries.Add(FindCountryUC.FindById(country)); };
+                try
+                {
+                    FileInfo fi = new(model.ImgEco.FileName);
+                    string ext = fi.Extension;
 
-                //model.Threats = ListThreatsUC.List();
-                //if (model.Ecosystem.Threats == null) { model.Ecosystem.Threats = new List<Threat>(); };
-                //if (model.IdSelectedThreats == null) { model.IdSelectedThreats = new List<int>(); };
-                //foreach (int threat in model.IdSelectedThreats) { model.Ecosystem.Threats.Add(FindThreatUC.Find(threat)); };
+                    if (ext == ".png" || ext == ".jpg")
+                    {
+                        //HAGO EL ALTA POR WEBAPI
+                        string url = $"{ApiURL}/api/Ecosystems";
+                        HttpResponseMessage response1 = Global.PostAsJson(url, model);
 
-                //model.Ecosystem.EcoConservation = FindConservationUC.FindBySecurity(model.Ecosystem.Security);
-                //model.Ecosystem.EcosystemName = new Domain.ValueObjects.Name(model.EcosystemNameVAL);
-                //model.Ecosystem.EcoDescription = new Domain.ValueObjects.Description(model.EcoDescriptionVAL);
-                //model.Ecosystem.GeoDetails = new Domain.ValueObjects.GeoUbication(model.Lat, model.Long);
+                        //cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);                        
 
-                //FileInfo fi = new(model.ImgEco.FileName);
-                //string ext = fi.Extension;
+                        if (response1.IsSuccessStatusCode)
+                        {
+                            //OBTENGO EL ID GENERADO   
+                            string body = Global.GetContent(response1);
+                            EcosystemDTO created = JsonConvert.DeserializeObject<EcosystemDTO>(body);
+                            int generated_id = created.Id;
 
-                //if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
-                //{
-                //    string trimmedString = model.EcosystemNameVAL.Replace(" ", "");
-                //    string fileName = trimmedString + "_001" + ext;
-                //    model.Ecosystem.ImgRoute = fileName;
+                            //GUARDO LA IMAGEN LOCALMENTE
+                            string imgName = generated_id + ext;
 
-                //    model.Ecosystem.Validate();
-                //    AddUC.Add(model.Ecosystem);
+                            string routeDir = WHE.WebRootPath;
+                            string route = Path.Combine(routeDir, "Banderas", imgName);
 
-                //    string rootDir = WHE.WebRootPath;
-                //    string route = Path.Combine(rootDir, "img/Ecosystems", fileName);
-                //    using (FileStream fs = new(route, FileMode.Create))
-                //    {
-                //        model.ImgEco.CopyTo(fs);
-                //    }
-                return RedirectToAction(nameof(Index));
-                //}
-                //else
-                //{
-                //    ViewBag.Error = "El tipo de imagen debe ser png, jpg o jpeg.";
-                //    ModelState.AddModelError(string.Empty, ViewBag.Error);
+                            FileStream fs = new(route, FileMode.Create);
+                            model.ImgEco.CopyTo(fs);
+                            fs.Flush();
+                            fs.Close();
+
+                            //ACTUALIZO EL NOMBRE DE IMAGEN DEL PAIS DADO DE ALTA
+                            created.ImgRoute = imgName;
+                            url = url + "/" + generated_id;
+                            HttpResponseMessage response2 = Global.PutAsJson(url, imgName);
+
+                            if (response2.IsSuccessStatusCode)
+                            {
+                                return RedirectToAction(nameof(Index));
+                            }
+                            else
+                            {
+                                string error1 = Global.GetContent(response2);
+                                ViewBag.Error = error1;
+                            }
+                        }
+                        else
+                        {
+                            string error = Global.GetContent(response1);
+                            ViewBag.Error = error;
+                            return View(model);
+                        }
+                    }
+                    else
+                    {
+                        ViewBag.Error = "El tipo de imagen debe ser png o jpg";
+                        return View(model);
+                    }
+                }
+                catch (Exception)
+                {
+                    ViewBag.Error = "Ocurrió un error inesperado, no se ha podido realizar el alta del ecosistema.";
+                }
                 return View(model);
-                // }
             }
-            //catch (EcosystemException ex)
-            //{
-            //    ModelState.AddModelError(string.Empty, ex.Message);
-            //    return View(model);
-            //}
-            catch (InvalidOperationException ex)
+            else
             {
-                ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
-                return View(model);
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError(string.Empty, ex.Message);
-                return View(model);
+                return RedirectToAction("Login", "User");
             }
         }
 
-        //[Private]
+        [Private]
+        public ActionResult Delete(int id)
+        {
+            return View(id);
+        }
+
         //public ActionResult Delete(int id)
         //{
 

@@ -1,4 +1,5 @@
-﻿@model EcosystemApp.Models.VMSpecies;
+﻿@using DTOs;
+@model EcosystemApp.Models.VMSpecies;
 
 @{
     ViewData["Title"] = "AddSpecies";
@@ -17,14 +18,14 @@
                 <span asp-validation-for="Species.CientificName" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="SpeciesNameVal" class="control-label">Nombre de la especie</label>
-                <input asp-for="SpeciesNameVal" class="form-control" />
-                <span asp-validation-for="SpeciesNameVal" class="text-danger"></span>
+                <label asp-for="Species.Name" class="control-label">Nombre de la especie</label>
+                <input asp-for="Species.Name" class="form-control" />
+                <span asp-validation-for="Species.Name" class="text-danger"></span>
             </div>
             <div class="form-group">
-                <label asp-for="SpeciesDescriptionVal" class="control-label">Descripción</label>
-                <textarea asp-for="SpeciesDescriptionVal" class="form-control"></textarea>
-                <span asp-validation-for="SpeciesDescriptionVal" class="text-danger"></span>
+                <label asp-for="Species.Description" class="control-label">Descripción</label>
+                <textarea asp-for="Species.Description" class="form-control"></textarea>
+                <span asp-validation-for="Species.Description" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Species.WeightRangeMin" class="control-label">Peso mínimo(kg)</label>
@@ -59,15 +60,15 @@
             <div class="form-group">
                 <label class="control-label">Amenazas</label>
                 <select name="IdSelectedThreats" multiple>
-                    @foreach (Domain.Entities.Threat threat in Model.Threats)
+                    @foreach (ThreatDTO threat in Model.Threats)
                     {
                         if (Model.IdSelectedThreats.Contains(threat.Id))
                         {
-                            <option selected value="@threat.Id">@threat.ThreatName.Value</option>
+                            <option selected value="@threat.Id">@threat.Name</option>
                         }
                         else
                         {
-                            <option value="@threat.Id">@threat.ThreatName.Value</option>
+                            <option value="@threat.Id">@threat.Name</option>
                         }
                     }
                 </select>
@@ -75,15 +76,15 @@
             <div class="form-group">
                 <label class="control-label">Ecosistemas</label>
                 <select name="IdSelectedEcos" multiple>
-                    @foreach (Domain.Entities.Ecosystem eco in Model.Ecosystems)
+                    @foreach (EcosystemDTO eco in Model.Ecosystems)
                     {
                         if (Model.IdSelectedThreats.Contains(eco.Id))
                         {
-                            <option selected value="@eco.Id">@eco.EcosystemName.Value</option>
+                            <option selected value="@eco.Id">@eco.Name</option>
                         }
                         else
                         {
-                            <option value="@eco.Id">@eco.EcosystemName.Value</option>
+                            <option value="@eco.Id">@eco.Name</option>
                         }
                     }
                 </select>

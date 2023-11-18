@@ -1,5 +1,3 @@
-﻿using System.Security.Policy;
-
 namespace EcosystemApp.Globals
 {
     public class Global
@@ -24,6 +22,28 @@ namespace EcosystemApp.Globals
             task.Wait();
 
             return task.Result;
+        }
+
+        public static HttpResponseMessage PostAsJson(string url, Object model)
+        {
+            HttpClient client = new();
+
+            Task<HttpResponseMessage> task = client.PostAsJsonAsync(url, model);
+            task.Wait();
+
+            HttpResponseMessage response = task.Result;
+            return response;
+        }
+
+        public static HttpResponseMessage PutAsJson(string url, string str)
+        {
+            HttpClient client = new();
+
+            Task<HttpResponseMessage> task = client.PutAsJsonAsync(url, str);
+            task.Wait();
+
+            HttpResponseMessage response = task.Result;
+            return response;
         }
     }
 }

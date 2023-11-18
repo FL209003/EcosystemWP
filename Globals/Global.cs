@@ -1,6 +1,3 @@
-﻿using System.Security.Policy;
-using System.Threading;
-
 namespace EcosystemApp.Globals
 {
     public class Global
@@ -13,6 +10,7 @@ namespace EcosystemApp.Globals
             task.Wait();
 
             HttpResponseMessage response = task.Result;
+
             return response;
         }
 

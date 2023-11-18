@@ -12,12 +12,12 @@ namespace DTOs
 
         public UserDTO() { }
 
-        public UserDTO(int id, string username, string pass, string hashPass, string role)
+        public UserDTO(int id, string username, string pass, string role)
         {
             Id = id;
             Username = username; 
             Password = pass;
-            HashPassword = hashPass;
+            HashPassword = pass;
             Role = role;
             RegDate = DateTime.Now;
         }

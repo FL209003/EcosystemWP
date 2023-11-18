@@ -24,13 +24,13 @@ namespace EcosystemApp.Controllers
         public ActionResult Login() { return View(); }
 
         [HttpPost]
-        public IActionResult Login(VMUser u)
+        public IActionResult Login(VMUser model)
         {
             try
-            {                
+            {
                 string url = $"{ApiURL}/api/Users";
                 //cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                HttpResponseMessage response = Global.PostAsJson(url, u);
+                HttpResponseMessage response = Global.PostAsJson(url, model);
                 string body = Global.GetContent(response);
 
                 if (response.IsSuccessStatusCode)
@@ -50,7 +50,7 @@ namespace EcosystemApp.Controllers
                 else
                 {
                     ViewBag.Error = body;
-                    return View(u);
+                    return View(model);
                 }
             }
             catch
@@ -90,39 +90,49 @@ namespace EcosystemApp.Controllers
             //}
             return View(model);
         }
-        public IActionResult Logout()
+        public ActionResult Logout()
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
         }
 
-        public IActionResult AddUser() { return View(); }
+        public ActionResult AddUser() { return View(); }
 
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult AddUser(VMUser model)
-        //{
-        //        try
-        //        {
-        //            model.User.HashPassword = Hash.ComputeSha256Hash(model.User.Password);
-        //            model.User.Validate();
-        //            if (model.VerificationPass == model.User.Password)
-        //            {
-        //                AddUC.Add(model.User);
-        //                return RedirectToAction("Index", "Home");
-        //            }
-        //            else throw new InvalidOperationException("Las contraseñas no coinciden.");
-        //        }
-        //        catch (InvalidOperationException ex)
-        //        {
-        //            ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
-        //            return View(model);
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
-        //            return View(model);
-        //        }
-        //}
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddUser(VMUser model)
+        {
+            try
+            {
+                model.User.HashPassword = Hash.ComputeSha256Hash(model.User.Password);
+                if (ModelState.IsValid && model.VerificationPass == model.User.Password)
+                {
+                    string url = $"{ApiURL}/api/Users";
+
+                    HttpResponseMessage response = Global.PostAsJson(url, model);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
+                    else
+                    {
+                        string error = Global.GetContent(response);
+                        ViewBag.Error = error;
+                        return View(model);
+                    }
+                }
+                else
+                {
+                    ViewBag.Error = "Todos los campos son obligatorios.";
+                    return View(model);
+                }
+            }
+            catch (Exception)
+            {
+                ViewBag.Error = "Ocurrió un error inesperado, no se ha podido crear el usuario.";
+            }
+            return View(model);
+        }
     }
 }

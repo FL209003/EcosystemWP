@@ -12,7 +12,7 @@ namespace EcosystemApp.Filters
         {
             var userName = context.HttpContext.Session.GetString("username");
             var password = context.HttpContext.Session.GetString("password");
-            var userRole = context.HttpContext.Session.GetString("rol");
+            var userRole = context.HttpContext.Session.GetString("role");
             var token = context.HttpContext.Session.GetString("token");
 
             if (!string.IsNullOrEmpty(userName) || !string.IsNullOrEmpty(password) || !string.IsNullOrEmpty(token))

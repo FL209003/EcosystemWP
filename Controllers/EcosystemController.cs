@@ -4,8 +4,6 @@ using EcosystemApp.Models;
 using DTOs;
 using Newtonsoft.Json;
 using EcosystemApp.Globals;
-using System.Security.Policy;
-using System;
 
 namespace EcosystemApp.Controllers
 {
@@ -22,20 +20,18 @@ namespace EcosystemApp.Controllers
 
         public ActionResult Index()
         {
-            IEnumerable<EcosystemDTO> ecos = null;
+            string urlEco = $"{ApiURL}/api/Ecosistem/";
 
-            string url = $"{ApiURL}/api/Countries/";
+            string bodyEcos = Global.GetContent(Global.GetResponse(urlEco));            
 
-            string body = Global.GetContent(Global.GetResponse(url));
-
-            if (Global.GetResponse(url).IsSuccessStatusCode)
+            if (Global.GetResponse(urlEco).IsSuccessStatusCode)
             {
-                ecos = JsonConvert.DeserializeObject<List<EcosystemDTO>>(body);
+                IEnumerable<EcosystemDTO> ecos = JsonConvert.DeserializeObject<List<EcosystemDTO>>(bodyEcos);
                 return View(ecos);
             }
             else
             {
-                ViewBag.Error = body;
+                ViewBag.Error = bodyEcos;
                 return View(new List<EcosystemDTO>());
             }
         }
@@ -45,8 +41,8 @@ namespace EcosystemApp.Controllers
         [Private]
         public ActionResult AddEcosystem()
         {
-            string urlCountries = $"{ApiURL}/api/Countries/";
-            string urlThreats = $"{ApiURL}/api/Threats/";
+            string urlCountries = $"{ApiURL}/api/Country/";
+            string urlThreats = $"{ApiURL}/api/Threat/";
 
             string bodyCountries = Global.GetContent(Global.GetResponse(urlCountries));
             string bodyThreats = Global.GetContent(Global.GetResponse(urlThreats));
@@ -54,7 +50,7 @@ namespace EcosystemApp.Controllers
             IEnumerable<CountryDTO> countries = JsonConvert.DeserializeObject<List<CountryDTO>>(bodyCountries);
             IEnumerable<ThreatDTO> threats = JsonConvert.DeserializeObject<List<ThreatDTO>>(bodyThreats);
 
-            VMEcosystem vmEcosystem = new VMEcosystem() { Countries = countries, IdSelectedCountry = new List<int>(), Threats = threats, IdSelectedThreats = new List<int>() };
+            VMEcosystem vmEcosystem = new() { Countries = countries, IdSelectedCountry = new List<int>(), Threats = threats, IdSelectedThreats = new List<int>() };
             return View(vmEcosystem);
         }
 
@@ -64,7 +60,7 @@ namespace EcosystemApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddEcosystem(VMEcosystem model)
         {
-            if (HttpContext.Session.GetString("rol") != null)
+            if (HttpContext.Session.GetString("role") != null)
             {
                 try
                 {
@@ -74,7 +70,7 @@ namespace EcosystemApp.Controllers
                     if (ext == ".png" || ext == ".jpg")
                     {
                         //HAGO EL ALTA POR WEBAPI
-                        string url = $"{ApiURL}/api/Ecosystems";
+                        string url = $"{ApiURL}/api/Ecosystem";
                         HttpResponseMessage response1 = Global.PostAsJson(url, model);
 
                         //cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);                        
@@ -90,7 +86,7 @@ namespace EcosystemApp.Controllers
                             string imgName = generated_id + ext;
 
                             string routeDir = WHE.WebRootPath;
-                            string route = Path.Combine(routeDir, "Banderas", imgName);
+                            string route = Path.Combine(routeDir, "Ecosystems", imgName);
 
                             FileStream fs = new(route, FileMode.Create);
                             model.ImgEco.CopyTo(fs);
@@ -121,7 +117,7 @@ namespace EcosystemApp.Controllers
                     }
                     else
                     {
-                        ViewBag.Error = "El tipo de imagen debe ser png o jpg";
+                        ViewBag.Error = "El tipo de imagen debe ser png o jpg.";
                         return View(model);
                     }
                 }
@@ -141,6 +137,27 @@ namespace EcosystemApp.Controllers
         public ActionResult Delete(int id)
         {
             return View(id);
+        }
+
+        [Private]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id, IFormCollection collection)
+        {
+            string url = $"{ApiURL}/api/Ecosystem/{id}";
+
+            HttpResponseMessage response = Global.Delete(url);
+
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                string error = Global.GetContent(response);
+                ViewBag.Error = error;
+                return View();
+            }
         }
 
         //public ActionResult Delete(int id)

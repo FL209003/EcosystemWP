@@ -47,5 +47,16 @@ namespace EcosystemApp.Globals
             HttpResponseMessage response = task.Result;
             return response;
         }
+
+        public static HttpResponseMessage Delete(string url)
+        {
+            HttpClient client = new();
+
+            Task<HttpResponseMessage> task = client.DeleteAsync(url);
+            task.Wait();
+
+            HttpResponseMessage response = task.Result;
+            return response;
+        }
     }
 }

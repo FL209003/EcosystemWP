@@ -1,7 +1,11 @@
 ﻿//using AppLogic.UCInterfaces;
+using DTOs;
+using EcosystemApp.Globals;
 using EcosystemApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using PresentacionMVC.DTOs;
 //using EcosystemApp.Filters;
 //using Exceptions;
 //using Domain.Entities;
@@ -13,79 +17,64 @@ namespace EcosystemApp.Controllers
 {
     public class SpeciesController : Controller
     {
-        //public IAddSpecies AddUC { get; set; }
-        //public IListSpecies ListUC { get; set; }
-        //public IFindSpecies FindUC { get; set; }
-        //public IRemoveSpecies RemoveUC { get; set; }
-        //public IListThreats ListThreatsUC { get; set; }
-        //public IFindThreat FindThreatUC { get; set; }
-        //public IWebHostEnvironment WHE { get; set; }
-        //public IFindConservation FindConservationUC { get; set; }
-        //public IListEcosystem ListEcosystemUC { get; set; }
-        //public IFindEcosystem FindEcosystemUC { get; set; }
-        //public IUpdateSpecies UpdateSpeciesUC { get; set; }
 
-        //public SpeciesController(IAddSpecies addUC, IWebHostEnvironment whe, IListSpecies listUC,
-        //    IRemoveSpecies removeUC, IFindSpecies findUC, IListThreats listThreatsUC, IFindConservation findConservationUC,
-        //    IFindThreat findThreatUC, IListEcosystem listEcosystemUC, IFindEcosystem findEcosystemUC, IUpdateSpecies updateSpeciesUC)
-        //{
-        //    AddUC = addUC;
-        //    ListUC = listUC;
-        //    WHE = whe;
-        //    FindUC = findUC;
-        //    RemoveUC = removeUC;
-        //    ListThreatsUC = listThreatsUC;
-        //    FindConservationUC = findConservationUC;
-        //    FindThreatUC = findThreatUC;
-        //    ListEcosystemUC = listEcosystemUC;
-        //    FindEcosystemUC = findEcosystemUC;
-        //    UpdateSpeciesUC = updateSpeciesUC;
-        //}
+        public IWebHostEnvironment WHE { get; set; }
+        public string? ApiURL { get; set; }
+
+        public SpeciesController(IWebHostEnvironment whe, IConfiguration conf)
+        {
+            WHE = whe;
+            ApiURL = conf.GetValue<string>("ApiURL");
+        }
         public ActionResult Index(string? option, int? optionParam1, int? optionParam2)
         {
-            //IEnumerable<Species> species = new List<Species>(); ;
-            //try
-            //{                
-            //    if (option == "Cientific")
-            //    {
-            //        species = ListUC.ListByCientificName();
-            //    }
-            //    else if (option == "Extintion")
-            //    {
-            //        species = ListUC.ListByDangerOfExtinction();
-            //    }
-            //    else if (option == "Weight" && optionParam1 != null && optionParam2 != null)
-            //    {
-            //        int min = optionParam1.Value;
-            //        int max = optionParam2.Value;
-            //       species = ListUC.ListByWeight(min, max);
-            //    }
-            //    else if (option == "eco" && optionParam1 != null)
-            //    {
-            //        int idEco = optionParam1.Value;
-            //        species = ListUC.ListByEco(idEco);
-            //    }
-            //    else
-            //    {
-            //        species = ListUC.List();
-            //    }
+            IEnumerable<SpeciesDTO> species = new List<SpeciesDTO>();
+            string url = $"{ApiURL}api/Species";
+            try
+            {
+                if (option == "Cientific")
+                {
+                    url = $"{ApiURL}api/Species/OrderByScientific";
+                }
+                else if (option == "Extintion")
+                {
+                    url = $"{ApiURL}api/Species/Endangered";
+                }
+                else if (option == "Weight" && optionParam1 != null && optionParam2 != null)
+                {
+                    int min = optionParam1.Value;
+                    int max = optionParam2.Value;
+                    url = $"{ApiURL}api/Species/Weight/{min}/{max}";
+                }
+                else if (option == "eco" && optionParam1 != null)
+                {
+                    int idEco = optionParam1.Value;
+                    url = $"{ApiURL}api/Species";
+                }
+                else
+                {
+                    url = $"{ApiURL}api/Species";
+                }
 
-            //    if (species != null && species.Count() > 0)
-            //    {
-            //        return View(species);
-            //    }
-            //    else            
-            //    {
-            //        ViewBag.Error = "No se encontraron Especies.";
-            //        return View(species);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    ViewBag.Error = "No se encontraron Especies.";
-            //    return View(species);
-            //}
-            return View();
+                HttpResponseMessage response = Global.GetResponse(url);
+                string body = Global.GetContent(response);
+                species = JsonConvert.DeserializeObject<List<SpeciesDTO>>(body);
+
+                if (species != null && species.Count() > 0)
+                {
+                    return View(species);
+                }
+                else
+                {
+                    ViewBag.Error = "No se encontraron Especies.";
+                    return View(species);
+                }
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Error = "Ha ocurrido un error";
+                return View(species);
+            }
         }
 
         public ActionResult ListUninhabitableEcos(int id)

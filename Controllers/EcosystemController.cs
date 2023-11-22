@@ -20,7 +20,7 @@ namespace EcosystemApp.Controllers
 
         public ActionResult Index()
         {
-            string urlEco = $"{ApiURL}/api/Ecosistem/";
+            string urlEco = $"{ApiURL}api/Ecosistem/";
 
             string bodyEcos = Global.GetContent(Global.GetResponse(urlEco));            
 
@@ -37,12 +37,10 @@ namespace EcosystemApp.Controllers
         }
 
         // public IActionResult Details() { return View(); }
-
-        [Private]
-        public ActionResult AddEcosystem()
+        private VMEcosystem GenerateModelPost()
         {
-            string urlCountries = $"{ApiURL}/api/Country/";
-            string urlThreats = $"{ApiURL}/api/Threat/";
+            string urlCountries = $"{ApiURL}api/Country/";
+            string urlThreats = $"{ApiURL}api/Threat/";
 
             string bodyCountries = Global.GetContent(Global.GetResponse(urlCountries));
             string bodyThreats = Global.GetContent(Global.GetResponse(urlThreats));
@@ -50,8 +48,12 @@ namespace EcosystemApp.Controllers
             IEnumerable<CountryDTO> countries = JsonConvert.DeserializeObject<List<CountryDTO>>(bodyCountries);
             IEnumerable<ThreatDTO> threats = JsonConvert.DeserializeObject<List<ThreatDTO>>(bodyThreats);
 
-            VMEcosystem vmEcosystem = new() { Countries = countries, IdSelectedCountry = new List<int>(), Threats = threats, IdSelectedThreats = new List<int>() };
-            return View(vmEcosystem);
+            return new VMEcosystem() { Countries = countries, IdSelectedCountry = new List<int>(), Threats = threats, IdSelectedThreats = new List<int>() };
+        }
+        [Private]
+        public ActionResult AddEcosystem()
+        {  
+            return View(GenerateModelPost());
         }
 
         // POST: EcosystemController/Create
@@ -64,14 +66,44 @@ namespace EcosystemApp.Controllers
             {
                 try
                 {
+
                     FileInfo fi = new(model.ImgEco.FileName);
                     string ext = fi.Extension;
 
-                    if (ext == ".png" || ext == ".jpg")
+                    //get conservation
+                    string urlConservation = $"{ApiURL}api/Conservation?sec={model.Ecosystem.Security}";
+                    string bodyConservation = Global.GetContent(Global.GetResponse(urlConservation));
+                    ConservationDTO cons = JsonConvert.DeserializeObject<ConservationDTO>(bodyConservation);
+                    model.Ecosystem.Conservation = cons;
+
+                    List<CountryDTO> countries = new List<CountryDTO>();
+
+                    model.IdSelectedCountry.ForEach(country => {
+                        string urlCountry = $"{ApiURL}api/Country/{country}";
+                        string bodyCountry = Global.GetContent(Global.GetResponse(urlCountry));
+                        CountryDTO c = JsonConvert.DeserializeObject<CountryDTO>(bodyCountry);
+                        countries.Add(c);
+                    });
+                    model.Ecosystem.Countries = countries;
+
+                    List<ThreatDTO> threats = new List<ThreatDTO>();
+
+                    model.IdSelectedThreats.ForEach(threat => {
+                        string urlThreat = $"{ApiURL}api/Threat/{threat}";
+                        string bodyThreat = Global.GetContent(Global.GetResponse(urlThreat));
+                        ThreatDTO t = JsonConvert.DeserializeObject<ThreatDTO>(bodyThreat);
+                        threats.Add(t);
+                    });
+                    model.Ecosystem.Threats = threats;
+
+                    model.Ecosystem.ImgRoute = "placeholder";
+                    model.Ecosystem.Species = new List<SpeciesDTO>();
+
+                    if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
                     {
                         //HAGO EL ALTA POR WEBAPI
-                        string url = $"{ApiURL}/api/Ecosystem";
-                        HttpResponseMessage response1 = Global.PostAsJson(url, model);
+                        string url = $"{ApiURL}api/Ecosystem";
+                        HttpResponseMessage response1 = Global.PostAsJson(url, model.Ecosystem);
 
                         //cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);                        
 
@@ -86,7 +118,7 @@ namespace EcosystemApp.Controllers
                             string imgName = generated_id + ext;
 
                             string routeDir = WHE.WebRootPath;
-                            string route = Path.Combine(routeDir, "Ecosystems", imgName);
+                            string route = Path.Combine(routeDir,"img/Ecosystems", imgName);
 
                             FileStream fs = new(route, FileMode.Create);
                             model.ImgEco.CopyTo(fs);
@@ -95,8 +127,8 @@ namespace EcosystemApp.Controllers
 
                             //ACTUALIZO EL NOMBRE DE IMAGEN DEL PAIS DADO DE ALTA
                             created.ImgRoute = imgName;
-                            url = url + "/" + generated_id;
-                            HttpResponseMessage response2 = Global.PutAsJson(url, imgName);
+                            
+                            HttpResponseMessage response2 = Global.PutAsJson(url, created);
 
                             if (response2.IsSuccessStatusCode)
                             {
@@ -112,20 +144,20 @@ namespace EcosystemApp.Controllers
                         {
                             string error = Global.GetContent(response1);
                             ViewBag.Error = error;
-                            return View(model);
+                            return View(GenerateModelPost());
                         }
                     }
                     else
                     {
                         ViewBag.Error = "El tipo de imagen debe ser png o jpg.";
-                        return View(model);
+                        return View(GenerateModelPost());
                     }
                 }
                 catch (Exception)
                 {
                     ViewBag.Error = "Ocurrió un error inesperado, no se ha podido realizar el alta del ecosistema.";
                 }
-                return View(model);
+                return View(GenerateModelPost());
             }
             else
             {
@@ -144,7 +176,7 @@ namespace EcosystemApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult Delete(int id, IFormCollection collection)
         {
-            string url = $"{ApiURL}/api/Ecosystem/{id}";
+            string url = $"{ApiURL}api/Ecosystem/{id}";
 
             HttpResponseMessage response = Global.Delete(url);
 

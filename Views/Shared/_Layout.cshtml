@@ -31,7 +31,7 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="AddUser"><b>Crear Usuario</b></a>
                             </li>
                         }
-                        @if (Context.Session.GetString("role") == "Admin" || Context.Session.GetString("role") == "User")
+                        @if (Context.Session.GetString("role") != null)
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Param" asp-action="ModifyNameLengths"><b>Cambiar largo Nombre</b></a>

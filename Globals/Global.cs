@@ -37,11 +37,11 @@ namespace EcosystemApp.Globals
             return response;
         }
 
-        public static HttpResponseMessage PutAsJson(string url, string str)
+        public static HttpResponseMessage PutAsJson(string url, Object model)
         {
             HttpClient client = new();
 
-            Task<HttpResponseMessage> task = client.PutAsJsonAsync(url, str);
+            Task<HttpResponseMessage> task = client.PutAsJsonAsync(url, model);
             task.Wait();
 
             HttpResponseMessage response = task.Result;

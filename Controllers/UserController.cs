@@ -62,7 +62,7 @@ namespace EcosystemApp.Controllers
         public ActionResult Logout()
         {
             HttpContext.Session.Clear();
-            return RedirectToAction("Login");
+            return RedirectToAction("Index", "Home");
         }
 
         [Private(Role = "Admin")]

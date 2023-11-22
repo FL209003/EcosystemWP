@@ -23,7 +23,7 @@ namespace EcosystemApp.Filters
             }
             else
             {
-                context.Result = new RedirectToActionResult("Login", "Home", null);
+                context.Result = new RedirectToActionResult("Login", "User", null);
             }
         }
     }

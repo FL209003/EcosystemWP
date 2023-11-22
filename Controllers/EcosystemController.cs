@@ -20,7 +20,7 @@ namespace EcosystemApp.Controllers
 
         public ActionResult Index()
         {
-            string urlEco = $"{ApiURL}api/Ecosistem/";
+            string urlEco = $"{ApiURL}api/Ecosystem/";
 
             string bodyEcos = Global.GetContent(Global.GetResponse(urlEco));            
 

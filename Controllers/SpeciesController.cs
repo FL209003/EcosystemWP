@@ -1,17 +1,20 @@
 ﻿//using AppLogic.UCInterfaces;
 using DTOs;
+using EcosystemApp.Filters;
 using EcosystemApp.Globals;
 using EcosystemApp.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using PresentacionMVC.DTOs;
+using System;
 //using EcosystemApp.Filters;
 //using Exceptions;
 //using Domain.Entities;
 using System.Collections.Generic;
 //using AppLogic.UseCases;
 using System.Linq.Expressions;
+using System.Security.Policy;
 
 namespace EcosystemApp.Controllers
 {
@@ -49,7 +52,7 @@ namespace EcosystemApp.Controllers
                 else if (option == "eco" && optionParam1 != null)
                 {
                     int idEco = optionParam1.Value;
-                    url = $"{ApiURL}api/Species";
+                    url = $"{ApiURL}api/Species/byEco/{idEco}";
                 }
                 else
                 {
@@ -81,9 +84,13 @@ namespace EcosystemApp.Controllers
         {
             try
             {
-                //IEnumerable<Ecosystem> ecos = ListEcosystemUC.ListUninhabitableEcos(id);
-                //return View(ecos);
-                return View();
+                string url = $"{ApiURL}api/Ecosystem/UninhabitableEcos/{id}";
+                HttpResponseMessage response = Global.GetResponse(url);
+                string body = Global.GetContent(response);
+                List<EcosystemDTO> ecos = JsonConvert.DeserializeObject<List<EcosystemDTO>>(body);
+
+
+                return View(ecos);
             }
             catch(Exception ex)
             {
@@ -94,87 +101,151 @@ namespace EcosystemApp.Controllers
             
         }
 
-        // public IActionResult Details() { return View(); }
+        [Private]
+        public ActionResult Delete(int id)
+        {
+            return View(id);
+        }
 
-        //[Private]
-        //public ActionResult AddSpecies()
-        //{
-        //    IEnumerable<Threat> threats = ListThreatsUC.List();
-        //    IEnumerable<Ecosystem> ecos = ListEcosystemUC.List();
-        //    VMSpecies vm = new() { Threats = threats, IdSelectedThreats = new List<int>(), Ecosystems = ecos, IdSelectedEcos = new List<int>() };
+        [Private]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Delete(int id, IFormCollection collection)
+        {
+            string url = $"{ApiURL}api/Species/{id}";
 
-        //    return View(vm);
-        //}
+            HttpResponseMessage response = Global.Delete(url);
 
-        //// POST: SpeciesController/Create
-        //[Private]
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult AddSpecies(VMSpecies model)
-        //{
-        //    try
-        //    {
-        //        if (model.Species.Threats == null) { model.Species.Threats = new List<Threat>(); };
-        //        if (model.Species.Ecosystems == null) { model.Species.Ecosystems = new List<Ecosystem>(); };
+            if (response.IsSuccessStatusCode)
+            {
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                string error = Global.GetContent(response);
+                ViewBag.Error = error;
+                return View();
+            }
+        }
 
-        //        model.Threats = ListThreatsUC.List();
-        //        if (model.IdSelectedThreats == null) { model.IdSelectedThreats = new List<int>(); };
+        private VMSpecies GenerateModelPost()
+        {
+            string urlEcos = $"{ApiURL}api/Ecosystem/";
+            string urlThreats = $"{ApiURL}api/Threat/";
 
-        //        model.Ecosystems = ListEcosystemUC.List();
-        //        if (model.IdSelectedEcos == null) { model.IdSelectedEcos = new List<int>(); };
+            string bodyEcos = Global.GetContent(Global.GetResponse(urlEcos));
+            string bodyThreats = Global.GetContent(Global.GetResponse(urlThreats));
 
-        //        foreach (int threat in model.IdSelectedThreats) { model.Species.Threats.Add(FindThreatUC.Find(threat)); };
-        //        foreach (int eco in model.IdSelectedEcos) { model.Species.Ecosystems.Add(FindEcosystemUC.Find(eco)); };
+            IEnumerable<EcosystemDTO> ecos = JsonConvert.DeserializeObject<List<EcosystemDTO>>(bodyEcos);
+            IEnumerable<ThreatDTO> threats = JsonConvert.DeserializeObject<List<ThreatDTO>>(bodyThreats);
 
-        //        model.Species.SpeciesConservation = FindConservationUC.FindBySecurity(model.Species.Security);
-        //        model.Species.SpeciesName = new Domain.ValueObjects.Name(model.SpeciesNameVal);
-        //        model.Species.SpeciesDescription = new Domain.ValueObjects.Description(model.SpeciesDescriptionVal);
 
-        //        FileInfo fi = new(model.ImgSpecies.FileName);
-        //        string ext = fi.Extension;
+            VMSpecies vm = new() { Threats = threats, IdSelectedThreats = new List<int>(), Ecosystems = ecos, IdSelectedEcos = new List<int>() };
+            return vm;
+        }
 
-        //        if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
-        //        {
-        //            //aca no lo hicimos por id por que no tenemos el id hasta que se suba a la bd
-        //            string trimmedString = model.SpeciesNameVal.Replace(" ", "");
-        //            string fileName = trimmedString + "_001" + ext;
-        //            model.Species.ImgRoute = fileName;
+        [Private]
+        public ActionResult AddSpecies()
+        {
+            return View(GenerateModelPost());
+        }
 
-        //            model.Species.Validate();
-        //            AddUC.Add(model.Species);
+        // POST: SpeciesController/Create
+        [Private]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddSpecies(VMSpecies model)
+        {
+            try
+            {
+                List<ThreatDTO> threats = new List<ThreatDTO>();
 
-        //            string rootDir = WHE.WebRootPath;
-        //            string route = Path.Combine(rootDir, "img/Species", fileName);
-        //            using (FileStream fs = new(route, FileMode.Create))
-        //            {
-        //                model.ImgSpecies.CopyTo(fs);
-        //            }
+                model.IdSelectedThreats.ForEach(threat => {
+                    string urlThreat = $"{ApiURL}api/Threat/{threat}";
+                    string bodyThreat = Global.GetContent(Global.GetResponse(urlThreat));
+                    ThreatDTO t = JsonConvert.DeserializeObject<ThreatDTO>(bodyThreat);
+                    threats.Add(t);
+                });
+                model.Species.Threats = threats;
 
-        //            return RedirectToAction(nameof(Index));
-        //        }
-        //        else
-        //        {
-        //            ViewBag.Error = "El tipo de imagen debe ser png, jpg o jpeg.";
-        //            ModelState.AddModelError(string.Empty, ViewBag.Error);
-        //            return View(model);
-        //        }
-        //    }
-        //    catch (SpeciesException ex)
-        //    {
-        //        ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
-        //        return View(model);
-        //    }
-        //    catch (InvalidOperationException ex)
-        //    {
-        //        ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
-        //        return View(model);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
-        //        return View(model);
-        //    }
-        //}
+                List<EcosystemDTO> ecos = new List<EcosystemDTO>();
+
+                model.IdSelectedEcos.ForEach(eco => {
+                    string urlEcosystem = $"{ApiURL}api/Ecosystem/{eco}";
+                    string bodyEcosystem = Global.GetContent(Global.GetResponse(urlEcosystem));
+                    EcosystemDTO t = JsonConvert.DeserializeObject<EcosystemDTO>(bodyEcosystem);
+                    ecos.Add(t);
+                });
+                model.Species.Ecosystems = ecos;
+
+                string urlConservation = $"{ApiURL}api/Conservation?sec={model.Species.Security}";
+                string bodyConservation = Global.GetContent(Global.GetResponse(urlConservation));
+                ConservationDTO cons = JsonConvert.DeserializeObject<ConservationDTO>(bodyConservation);
+                model.Species.Conservation = cons;
+
+                FileInfo fi = new(model.ImgSpecies.FileName);
+                string ext = fi.Extension;
+                model.Species.ImgRoute = "placeholder";
+
+                if (ext == ".png" || ext == ".jpg" || ext == ".jpeg")
+                {
+
+                    string url = $"{ApiURL}api/Species";
+                    HttpResponseMessage response1 = Global.PostAsJson(url, model.Species);
+                    if (response1.IsSuccessStatusCode)
+                    {
+                        //OBTENGO EL ID GENERADO   
+                        string body = Global.GetContent(response1);
+                        SpeciesDTO created = JsonConvert.DeserializeObject<SpeciesDTO>(body);
+                        int generated_id = created.Id;
+
+                        //GUARDO LA IMAGEN LOCALMENTE
+                        string imgName = generated_id + ext;
+
+                        string routeDir = WHE.WebRootPath;
+                        string route = Path.Combine(routeDir, "img/Species", imgName);
+
+                        FileStream fs = new(route, FileMode.Create);
+                        model.ImgSpecies.CopyTo(fs);
+                        fs.Flush();
+                        fs.Close();
+
+                        //ACTUALIZO EL NOMBRE DE IMAGEN DEL PAIS DADO DE ALTA
+                        created.ImgRoute = imgName;
+
+                        HttpResponseMessage response2 = Global.PutAsJson(url, created);
+
+                        if (response2.IsSuccessStatusCode)
+                        {
+                            return RedirectToAction(nameof(Index));
+                        }
+                        else
+                        {
+                            string error1 = Global.GetContent(response2);
+                            ViewBag.Error = error1;
+                        }
+                    }
+                }
+                else
+                {
+                    ViewBag.Error = "El tipo de imagen debe ser png, jpg o jpeg.";
+                    ModelState.AddModelError(string.Empty, ViewBag.Error);
+                    return View(GenerateModelPost());
+                }
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
+                return View(GenerateModelPost());
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
+                return View(GenerateModelPost());
+            }
+            return View(GenerateModelPost());
+        }
+
 
         //[Private]
         //public ActionResult AssignEcosystem(int id)
@@ -199,7 +270,7 @@ namespace EcosystemApp.Controllers
         //        return View(vm);
 
         //    }
-            
+
         //}
 
         //[Private]
@@ -216,7 +287,7 @@ namespace EcosystemApp.Controllers
         //    catch (Exception ex)
         //    {
         //        Species species = FindUC.Find(speciesId);
-        //        IEnumerable<Ecosystem> ecos = ListEcosystemUC.ListUninhabitableEcos(speciesId);               
+        //        IEnumerable<Ecosystem> ecos = ListEcosystemUC.ListUninhabitableEcos(speciesId);
         //        VMSpecies vm = new VMSpecies() { Species = species, Ecosystems = ecos, IdSelectedThreats = new List<int>(), };
         //        ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
         //        ViewBag.Error = ex.Message;
@@ -225,6 +296,11 @@ namespace EcosystemApp.Controllers
 
         //    return RedirectToAction(nameof(Index));
         //}
+        // public IActionResult Details() { return View(); }
+
+
+
+
 
         //public ActionResult Edit(int id) { return View(id); }
 

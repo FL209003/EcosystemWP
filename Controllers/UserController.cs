@@ -76,15 +76,20 @@ namespace EcosystemApp.Controllers
             try
             {
                 model.User.HashPassword = Hash.ComputeSha256Hash(model.User.Password);
+
+                //el model state no queria validar el hash, ni idea por que
+                ModelState.Remove("User.HashPassword");
+                ModelState.MarkFieldValid("User.HashPassword");
+
                 if (ModelState.IsValid && model.VerificationPass == model.User.Password)
                 {
-                    string url = $"{ApiURL}/api/Users";
+                    string url = $"{ApiURL}api/User";
 
-                    HttpResponseMessage response = Global.PostAsJson(url, model);
+                    HttpResponseMessage response = Global.PostAsJson(url, model.User);
 
                     if (response.IsSuccessStatusCode)
                     {
-                        return RedirectToAction(nameof(Index));
+                        return RedirectToAction("Index", "Home");
                     }
                     else
                     {

@@ -1,4 +1,6 @@
 ﻿
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+
 namespace DTOs
 {
     public class UserDTO

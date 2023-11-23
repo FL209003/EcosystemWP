@@ -192,12 +192,13 @@ namespace EcosystemApp.Controllers
 
                     string url = $"{ApiURL}api/Species";
                     HttpResponseMessage response1 = Global.PostAsJson(url, model.Species);
+                    string body2 = Global.GetContent(response1);
                     if (response1.IsSuccessStatusCode)
                     {
                         //OBTENGO EL ID GENERADO   
                         string body = Global.GetContent(response1);
                         SpeciesDTO created = JsonConvert.DeserializeObject<SpeciesDTO>(body);
-                        int generated_id = created.Id;
+                        int? generated_id = created.Id;
 
                         //GUARDO LA IMAGEN LOCALMENTE
                         string imgName = generated_id + ext;

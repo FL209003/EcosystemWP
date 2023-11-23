@@ -1,8 +1,12 @@
 ﻿//using AppLogic.UCInterfaces;
 //using AppLogic.UseCases;
+using EcosystemApp.DTOs;
 using EcosystemApp.Filters;
+using EcosystemApp.Globals;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using System.Security.Policy;
 
 namespace EcosystemApp.Controllers
 {
@@ -15,7 +19,12 @@ namespace EcosystemApp.Controllers
         //{
         //    ModifyLengthParamUC = modifyUC;
         //}
+        public string? ApiURL { get; set; }
 
+        public ParamController(IConfiguration conf)
+        {
+            ApiURL = conf.GetValue<string>("ApiURL");
+        }
         public ActionResult ModifyNameLengths() { return View(); }        
 
         [HttpPost]
@@ -26,9 +35,14 @@ namespace EcosystemApp.Controllers
             {
                 if (maxLength > minLength)
                 {
-                    //ModifyLengthParamUC.ModifyNameParams(minLength, maxLength);
-                    //TempData["SuccessMessage"] = "Valores limite cambiados con éxito.";
-                    return View();
+                    string url = $"{ApiURL}api/Limit/name";
+                    HttpResponseMessage response1 = Global.PutAsJson(url, new LimitDTO(minLength, maxLength));
+                    if (response1.IsSuccessStatusCode) {
+                        TempData["SuccessMessage"] = "Valores limite cambiados con éxito.";
+                        return View();
+                    }         
+                    else throw new InvalidOperationException(response1.StatusCode.ToString());
+
                 }
                 else throw new InvalidOperationException("El largo máximo del nombre debe ser mayor al largo mínimo.");
             }
@@ -52,13 +66,14 @@ namespace EcosystemApp.Controllers
         {
             try
             {
-                if (maxLength > minLength)
+                string url = $"{ApiURL}api/Limit/desc";
+                HttpResponseMessage response1 = Global.PutAsJson(url, new LimitDTO(minLength, maxLength));
+                if (response1.IsSuccessStatusCode)
                 {
-                    //ModifyLengthParamUC.ModifyDescParams(minLength, maxLength);
-                    //TempData["SuccessMessage"] = "Valores limite cambiados con éxito.";
+                    TempData["SuccessMessage"] = "Valores limite cambiados con éxito.";
                     return View();
                 }
-                else throw new InvalidOperationException("El largo máximo de la descripción debe ser mayor al largo mínimo.");
+                else throw new InvalidOperationException(response1.StatusCode.ToString());
             }
             catch (InvalidOperationException ex)
             {

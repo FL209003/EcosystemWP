@@ -156,6 +156,7 @@ namespace EcosystemApp.Controllers
         [ValidateAntiForgeryToken]
         public IActionResult AddSpecies(VMSpecies model)
         {
+            string errorMsg = "";
             try
             {
                 List<ThreatDTO> threats = new List<ThreatDTO>();
@@ -193,7 +194,7 @@ namespace EcosystemApp.Controllers
                     string url = $"{ApiURL}api/Species";
                     string token = HttpContext.Session.GetString("token");
                     HttpResponseMessage response1 = Global.PostAsJson(url, model.Species, token);
-                    string body2 = Global.GetContent(response1);
+                    errorMsg = Global.GetContent(response1);
                     if (response1.IsSuccessStatusCode)
                     {
                         //OBTENGO EL ID GENERADO   
@@ -225,6 +226,12 @@ namespace EcosystemApp.Controllers
                             string error1 = Global.GetContent(response2);
                             ViewBag.Error = error1;
                         }
+                    }
+                    else
+                    {
+                        ViewBag.Error = errorMsg;
+                        ModelState.AddModelError(string.Empty, ViewBag.Error);
+                        return View(GenerateModelPost());
                     }
                 }
                 else

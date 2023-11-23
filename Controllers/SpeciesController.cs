@@ -113,8 +113,8 @@ namespace EcosystemApp.Controllers
         public IActionResult Delete(int id, IFormCollection collection)
         {
             string url = $"{ApiURL}api/Species/{id}";
-
-            HttpResponseMessage response = Global.Delete(url);
+            string token = HttpContext.Session.GetString("token");
+            HttpResponseMessage response = Global.Delete(url, token);
 
             if (response.IsSuccessStatusCode)
             {
@@ -191,7 +191,8 @@ namespace EcosystemApp.Controllers
                 {
 
                     string url = $"{ApiURL}api/Species";
-                    HttpResponseMessage response1 = Global.PostAsJson(url, model.Species);
+                    string token = HttpContext.Session.GetString("token");
+                    HttpResponseMessage response1 = Global.PostAsJson(url, model.Species, token);
                     string body2 = Global.GetContent(response1);
                     if (response1.IsSuccessStatusCode)
                     {
@@ -213,8 +214,7 @@ namespace EcosystemApp.Controllers
 
                         //ACTUALIZO EL NOMBRE DE IMAGEN DEL PAIS DADO DE ALTA
                         created.ImgRoute = imgName;
-
-                        HttpResponseMessage response2 = Global.PutAsJson(url, created);
+                        HttpResponseMessage response2 = Global.PutAsJson(url, created, token);
 
                         if (response2.IsSuccessStatusCode)
                         {
@@ -248,56 +248,95 @@ namespace EcosystemApp.Controllers
         }
 
 
-        //[Private]
-        //public ActionResult AssignEcosystem(int id)
-        //{
-        //    try
-        //    {
-        //        Species species = FindUC.Find(id);
-        //        IEnumerable<Ecosystem> ecos = ListEcosystemUC.ListUninhabitableEcos(id);
-        //        if (species == null)
-        //        {
-        //            ViewBag.Error = "La espcie con el id " + id + " no existe";
-        //        }
-        //        VMSpecies vm = new VMSpecies() { Species = species, Ecosystems = ecos, IdSelectedThreats = new List<int>(), };
-        //        return View(vm);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Species species = FindUC.Find(id);
-        //        IEnumerable<Ecosystem> ecos = ListEcosystemUC.ListUninhabitableEcos(id);
-        //        ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
-        //        VMSpecies vm = new VMSpecies() { Species = species, Ecosystems = ecos, IdSelectedThreats = new List<int>(), };
-        //        return View(vm);
+        [Private]
+        public ActionResult AssignEcosystem(int id)
+        {
+            try
+            {
 
-        //    }
+                
+                string url = $"{ApiURL}api/Species/{id}";
+                HttpResponseMessage response = Global.GetResponse(url);
+                string body = Global.GetContent(response);
+                SpeciesDTO species = JsonConvert.DeserializeObject<SpeciesDTO>(body);
 
-        //}
+                url = $"{ApiURL}api/Ecosystem/NotAssignedEcosBySpecies/{id}";
+                response = Global.GetResponse(url);
+                body = Global.GetContent(response);
+                IEnumerable<EcosystemDTO> ecos = JsonConvert.DeserializeObject<List<EcosystemDTO>>(body);
+                VMSpecies vm = new VMSpecies() { Species = species, Ecosystems = ecos, IdSelectedThreats = new List<int>(), };
+                return View(vm);
+            }
+            catch (Exception ex)
+            {
+                string url = $"{ApiURL}api/Species/{id}";
+                HttpResponseMessage response = Global.GetResponse(url);
+                string body = Global.GetContent(response);
+                SpeciesDTO species = JsonConvert.DeserializeObject<SpeciesDTO>(body);
 
-        //[Private]
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public IActionResult AssignEcosystem(VMSpecies s, int speciesId)
-        //{
-        //    try
-        //    {
-        //        Species species = FindUC.Find(speciesId);
-        //        foreach (int eco in s.IdSelectedEcos) { species.Ecosystems.Add(FindEcosystemUC.Find(eco)); };
-        //        UpdateSpeciesUC.UpdateSpecies(species);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Species species = FindUC.Find(speciesId);
-        //        IEnumerable<Ecosystem> ecos = ListEcosystemUC.ListUninhabitableEcos(speciesId);
-        //        VMSpecies vm = new VMSpecies() { Species = species, Ecosystems = ecos, IdSelectedThreats = new List<int>(), };
-        //        ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
-        //        ViewBag.Error = ex.Message;
-        //        return View(vm);
-        //    }
+                url = $"{ApiURL}api/Ecosystems";
+                response = Global.GetResponse(url);
+                body = Global.GetContent(response);
+                IEnumerable<EcosystemDTO> ecos = JsonConvert.DeserializeObject<List<EcosystemDTO>>(body);
+                VMSpecies vm = new VMSpecies() { Species = species, Ecosystems = ecos, IdSelectedThreats = new List<int>(), };
 
-        //    return RedirectToAction(nameof(Index));
-        //}
-        // public IActionResult Details() { return View(); }
+
+                ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
+                return View(vm);
+
+            }
+
+        }
+
+        [Private]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AssignEcosystem(VMSpecies s, int speciesId)
+        {
+            try
+            {
+
+                string url = $"{ApiURL}api/Species/{speciesId}";
+                HttpResponseMessage response = Global.GetResponse(url);
+                string body = Global.GetContent(response);
+                SpeciesDTO species = JsonConvert.DeserializeObject<SpeciesDTO>(body);
+
+                foreach (int eco in s.IdSelectedEcos) { species.Ecosystems.Add(GetEco(eco)); };
+
+                url = $"{ApiURL}api/Species";
+                string token = HttpContext.Session.GetString("token");
+                HttpResponseMessage response1 = Global.PutAsJson(url, species, token);
+                string body2 = Global.GetContent(response1);
+            }
+            catch (Exception ex)
+            {
+                string url = $"{ApiURL}api/Species/{speciesId}";
+                HttpResponseMessage response = Global.GetResponse(url);
+                string body = Global.GetContent(response);
+                SpeciesDTO species = JsonConvert.DeserializeObject<SpeciesDTO>(body);
+
+                url = $"{ApiURL}api/Ecosystems";
+                response = Global.GetResponse(url);
+                body = Global.GetContent(response);
+                IEnumerable<EcosystemDTO> ecos = JsonConvert.DeserializeObject<List<EcosystemDTO>>(body);
+                VMSpecies vm = new VMSpecies() { Species = species, Ecosystems = ecos, IdSelectedThreats = new List<int>(), };
+
+
+                ModelState.AddModelError(string.Empty, ViewBag.Error = ex.Message);
+                return View(vm);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private EcosystemDTO GetEco(int id)
+        {
+            string url = $"{ApiURL}api/Ecosystem/{id}";
+            HttpResponseMessage response = Global.GetResponse(url);
+            string body = Global.GetContent(response);
+            return JsonConvert.DeserializeObject<EcosystemDTO>(body);
+        }
+        public IActionResult Details() { return View(); }
 
 
 

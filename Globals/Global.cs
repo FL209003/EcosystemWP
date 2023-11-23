@@ -1,4 +1,6 @@
-﻿using System.Security.Policy;
+﻿using NuGet.Common;
+using System.Net.Http.Headers;
+using System.Security.Policy;
 using System.Threading;
 
 namespace EcosystemApp.Globals
@@ -26,10 +28,10 @@ namespace EcosystemApp.Globals
             return task.Result;
         }
 
-        public static HttpResponseMessage PostAsJson(string url, Object model)
+        public static HttpResponseMessage PostAsJson(string url, Object model, string token)
         {
             HttpClient client = new();
-
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             Task<HttpResponseMessage> task = client.PostAsJsonAsync(url, model);
             task.Wait();
 
@@ -37,10 +39,10 @@ namespace EcosystemApp.Globals
             return response;
         }
 
-        public static HttpResponseMessage PutAsJson(string url, Object model)
+        public static HttpResponseMessage PutAsJson(string url, Object model, string token)
         {
             HttpClient client = new();
-
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             Task<HttpResponseMessage> task = client.PutAsJsonAsync(url, model);
             task.Wait();
 
@@ -48,10 +50,10 @@ namespace EcosystemApp.Globals
             return response;
         }
 
-        public static HttpResponseMessage Delete(string url)
+        public static HttpResponseMessage Delete(string url, string token)
         {
             HttpClient client = new();
-
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             Task<HttpResponseMessage> task = client.DeleteAsync(url);
             task.Wait();
 

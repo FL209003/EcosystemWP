@@ -29,7 +29,7 @@ namespace EcosystemApp.Controllers
             {
                 string url = $"{ApiURL}api/User/Login";
                 //cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
-                HttpResponseMessage response = Global.PostAsJson(url, model.User);
+                HttpResponseMessage response = Global.PostAsJson(url, model.User, "");
                 string body = Global.GetContent(response);
 
                 if (response.IsSuccessStatusCode)
@@ -84,8 +84,8 @@ namespace EcosystemApp.Controllers
                 if (ModelState.IsValid && model.VerificationPass == model.User.Password)
                 {
                     string url = $"{ApiURL}api/User";
-
-                    HttpResponseMessage response = Global.PostAsJson(url, model.User);
+                    string token = HttpContext.Session.GetString("token");
+                    HttpResponseMessage response = Global.PostAsJson(url, model.User, token);
 
                     if (response.IsSuccessStatusCode)
                     {

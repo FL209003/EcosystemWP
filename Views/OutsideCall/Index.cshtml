@@ -1,0 +1,87 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ecosistemas</title>
+</head>
+
+<body>
+
+    <div id="resultados">
+        <!-- Aquí se mostrarán los resultados de la API -->
+    </div>
+
+    <!-- Incluir el archivo JavaScript -->
+    <script>
+        function obtenerDatosDeAPI() {
+            // URL de la API (reemplaza con tu propia URL)
+            var apiUrl = 'https://localhost:44308/api/Ecosystem';
+
+            // Realizar la petición utilizando fetch
+            fetch(apiUrl)
+                .then(function (response) {
+                    // Verificar si la respuesta es exitosa (código de estado 200)
+                    if (!response.ok) {
+                        throw new Error('La petición no fue exitosa');
+                    }
+                    // Convertir la respuesta a formato JSON
+                    return response.json();
+                })
+                .then(function (data) {
+                    // Manipular los datos recibidos (en este ejemplo, solo los mostramos)
+                    mostrarDatosEnPagina(data);
+                })
+                .catch(function (error) {
+                    console.error('Error al obtener datos de la API:', error);
+                });
+        }
+
+        // Función para mostrar los datos en la página
+        function mostrarDatosEnPagina(data) {
+            var resultadosDiv = document.getElementById('resultados');
+
+            // Limpiar cualquier contenido anterior en el div
+            resultadosDiv.innerHTML = '';
+
+            // Crear tabla HTML
+            var tabla = document.createElement('table');
+            tabla.border = '1';
+
+            // Crear encabezados de tabla
+            var encabezados = document.createElement('tr');
+            encabezados.innerHTML = '<th>ID</th><th>Nombre</th><th>Area</th><th>Descripción</th><th>Conservación</th><th>Seguridad</th>';
+            tabla.appendChild(encabezados);
+
+            // Recorrer los datos y agregar filas a la tabla
+            data.forEach(function (item) {
+                var fila = document.createElement('tr');
+                fila.innerHTML =
+                    `
+                    <td>${item.id}</td>
+                    <td>${item.name}</td>
+                    <td>${item.area}</td>
+                    <td>${item.description}</td>
+                    <td>${item.conservation.name}</td>
+                    <td>${item.security}</td>
+                    `;
+                tabla.appendChild(fila);
+            });
+
+            // Agregar la tabla al div de resultados
+            resultadosDiv.appendChild(tabla);
+        }
+
+        // Llamar a la función para obtener datos al cargar la página
+        obtenerDatosDeAPI();
+    </script>
+</body>
+
+</html>

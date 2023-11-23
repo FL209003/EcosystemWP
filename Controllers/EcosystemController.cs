@@ -103,7 +103,8 @@ namespace EcosystemApp.Controllers
                     {
                         //HAGO EL ALTA POR WEBAPI
                         string url = $"{ApiURL}api/Ecosystem";
-                        HttpResponseMessage response1 = Global.PostAsJson(url, model.Ecosystem);
+                        string token = HttpContext.Session.GetString("token");
+                        HttpResponseMessage response1 = Global.PostAsJson(url, model.Ecosystem, token);
 
                         //cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);                        
 
@@ -127,8 +128,7 @@ namespace EcosystemApp.Controllers
 
                             //ACTUALIZO EL NOMBRE DE IMAGEN DEL PAIS DADO DE ALTA
                             created.ImgRoute = imgName;
-                            
-                            HttpResponseMessage response2 = Global.PutAsJson(url, created);
+                            HttpResponseMessage response2 = Global.PutAsJson(url, created, token);
 
                             if (response2.IsSuccessStatusCode)
                             {
@@ -177,8 +177,8 @@ namespace EcosystemApp.Controllers
         public IActionResult Delete(int id, IFormCollection collection)
         {
             string url = $"{ApiURL}api/Ecosystem/{id}";
-
-            HttpResponseMessage response = Global.Delete(url);
+            string token = HttpContext.Session.GetString("token");
+            HttpResponseMessage response = Global.Delete(url, token);
 
             if (response.IsSuccessStatusCode)
             {

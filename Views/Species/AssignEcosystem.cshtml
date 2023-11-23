@@ -39,11 +39,6 @@
                 <p>
                     Nombre: @eco.Name <br />
                     Nivel de seguridad: @eco.Security <br />
-                    Amenazas:
-                    @foreach (ThreatDTO threat in eco.Threats)
-                    {
-                        @threat.Name
-                    }
                 </p>
             }
         }

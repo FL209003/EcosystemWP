@@ -36,7 +36,8 @@ namespace EcosystemApp.Controllers
                 if (maxLength > minLength)
                 {
                     string url = $"{ApiURL}api/Limit/name";
-                    HttpResponseMessage response1 = Global.PutAsJson(url, new LimitDTO(minLength, maxLength));
+                    string token = HttpContext.Session.GetString("token");
+                    HttpResponseMessage response1 = Global.PutAsJson(url, new LimitDTO(minLength, maxLength), token);
                     if (response1.IsSuccessStatusCode) {
                         TempData["SuccessMessage"] = "Valores limite cambiados con éxito.";
                         return View();
@@ -67,7 +68,8 @@ namespace EcosystemApp.Controllers
             try
             {
                 string url = $"{ApiURL}api/Limit/desc";
-                HttpResponseMessage response1 = Global.PutAsJson(url, new LimitDTO(minLength, maxLength));
+                string token = HttpContext.Session.GetString("token");
+                HttpResponseMessage response1 = Global.PutAsJson(url, new LimitDTO(minLength, maxLength), token);
                 if (response1.IsSuccessStatusCode)
                 {
                     TempData["SuccessMessage"] = "Valores limite cambiados con éxito.";
